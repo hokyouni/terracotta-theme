@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import { buildGlobalRules, buildLanguageRules, buildSemanticRules } from './scopes';
 import { resolvePreset } from './presets';
-import { PresetName, PartialTokenColors, TokenColorRule } from './types';
+import { PresetName, PartialTokenColors, TokenColorRule, TokenColors } from './types';
 
 const THEME_LABEL = 'Terracotta Light';
 const CONFIG_ROOT = 'terracotta';
+const VALID_PRESETS = new Set(['warm', 'claude', 'custom']);
 
 // ─── Locale helpers ───────────────────────────────────────────────────────────
 
+// Evaluated once at module load — stable for the lifetime of the extension process.
 const isChinese = vscode.env.language.toLowerCase().startsWith('zh');
 
 function t(en: string, zh: string): string {
@@ -24,30 +26,46 @@ const messages = {
   quickPickTitle:   t('Select color preset',              '选择配色方案'),
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function isOurThemeActive(): boolean {
+  return vscode.workspace.getConfiguration('workbench').get<string>('colorTheme') === THEME_LABEL;
+}
+
+/** Validates a user-supplied preset name at runtime; falls back to 'warm' with a warning. */
+function safePreset(name: string): PresetName {
+  if (VALID_PRESETS.has(name)) return name as PresetName;
+  console.warn(`[Terracotta] Unknown preset "${name}", falling back to "warm"`);
+  return 'warm';
+}
+
 // ─── Activation ───────────────────────────────────────────────────────────────
 
 export function activate(context: vscode.ExtensionContext): void {
-  // Command: switch preset
   context.subscriptions.push(
     vscode.commands.registerCommand('terracotta.switchPreset', switchPresetCommand)
   );
 
-  // Initial apply
   applyTokenColors();
 
-  // React to settings changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(event => {
       if (event.affectsConfiguration(CONFIG_ROOT)) {
         applyTokenColors();
       }
+      if (event.affectsConfiguration('workbench.colorTheme')) {
+        if (isOurThemeActive()) {
+          applyTokenColors();    // re-apply when the user switches to our theme
+        } else {
+          clearInjectedRules(); // clean up when the user switches away
+        }
+      }
     })
   );
 }
 
-export function deactivate(): void {
-  // Leave injected rules in place so the theme still renders correctly
-  // if the extension is temporarily disabled.
+export function deactivate(): Promise<void> {
+  return clearInjectedRules();
 }
 
 // ─── Command: switch preset ────────────────────────────────────────────────────
@@ -59,7 +77,7 @@ async function switchPresetCommand(): Promise<void> {
     { label: `$(gear) ${messages.presetCustom}`,  description: messages.presetCustomDesc, value: 'custom' },
   ];
 
-  const current = vscode.workspace.getConfiguration(CONFIG_ROOT).get<PresetName>('colorPreset', 'warm');
+  const current = vscode.workspace.getConfiguration(CONFIG_ROOT).get<string>('colorPreset', 'warm');
   items.forEach(item => { if (item.value === current) item.picked = true; });
 
   const selected = await vscode.window.showQuickPick(items, {
@@ -76,47 +94,81 @@ async function switchPresetCommand(): Promise<void> {
   }
 }
 
-// ─── Core color injection ─────────────────────────────────────────────────────
+// ─── Settings injection ────────────────────────────────────────────────────────
 
-function applyTokenColors(): void {
+async function applyTokenColors(): Promise<void> {
   const config = vscode.workspace.getConfiguration(CONFIG_ROOT);
 
   if (!config.get<boolean>('enableDynamicColors', true)) {
     return;
   }
 
-  const globalPreset    = config.get<PresetName>('colorPreset', 'warm');
-  const langOverrides   = config.get<Record<string, string>>('languages', {});
-  const customColors    = config.get<PartialTokenColors>('customColors', {});
-  const italicComments  = config.get<boolean>('italicComments', true);
-  const italicKeywords  = config.get<boolean>('italicKeywords', false);
-  const boldHeadings    = config.get<boolean>('boldHeadings', true);
+  const globalPreset   = safePreset(config.get<string>('colorPreset', 'warm'));
+  const langOverrides  = config.get<Record<string, string>>('languages', {});
+  const customColors   = config.get<PartialTokenColors>('customColors', {});
+  const italicComments = config.get<boolean>('italicComments', true);
+  const italicKeywords = config.get<boolean>('italicKeywords', false);
+  const boldHeadings   = config.get<boolean>('boldHeadings', true);
 
-  // 1. Universal rules from the global preset
   const globalColors = resolvePreset(globalPreset, customColors);
-  const globalRules = buildGlobalRules(globalColors, italicComments, italicKeywords, boldHeadings);
+  const globalRules  = buildGlobalRules(globalColors, italicComments, italicKeywords, boldHeadings);
 
-  // 2. Language-specific supplement rules (appended after global, so they win on equal specificity)
   const langRules: TokenColorRule[] = [];
-  for (const [langId, presetName] of Object.entries(langOverrides)) {
-    if (presetName === 'follow-global') continue;
-    const resolved = resolvePreset(presetName as PresetName, customColors);
-    langRules.push(...buildLanguageRules(langId, resolved, italicComments, italicKeywords, boldHeadings));
+  const langSemanticColors: Record<string, TokenColors> = {};
+
+  for (const [langId, rawPreset] of Object.entries(langOverrides)) {
+    if (rawPreset === 'follow-global') continue;
+    const resolved = resolvePreset(safePreset(rawPreset), customColors);
+    langRules.push(...buildLanguageRules(langId, resolved, italicComments, boldHeadings));
+    langSemanticColors[langId] = resolved;
   }
 
-  const allRules = [...globalRules, ...langRules];
+  try {
+    // Sequential awaits: avoid concurrent writes racing on the same settings file
+    await vscode.workspace.getConfiguration('editor').update(
+      'tokenColorCustomizations',
+      { [`[${THEME_LABEL}]`]: { textMateRules: [...globalRules, ...langRules] } },
+      vscode.ConfigurationTarget.Global
+    );
 
-  // 3. Inject tokenColorCustomizations scoped to Terracotta Light only
-  vscode.workspace.getConfiguration('editor').update(
-    'tokenColorCustomizations',
-    { [`[${THEME_LABEL}]`]: { textMateRules: allRules } },
-    vscode.ConfigurationTarget.Global
-  );
+    await vscode.workspace.getConfiguration('editor').update(
+      'semanticTokenColorCustomizations',
+      { [`[${THEME_LABEL}]`]: buildSemanticRules(globalColors, italicComments, langSemanticColors) },
+      vscode.ConfigurationTarget.Global
+    );
+  } catch (err) {
+    console.error('[Terracotta] Failed to apply token colors:', err);
+  }
+}
 
-  // 4. Inject semantic token overrides scoped to Terracotta Light only
-  vscode.workspace.getConfiguration('editor').update(
-    'semanticTokenColorCustomizations',
-    { [`[${THEME_LABEL}]`]: buildSemanticRules(globalColors) },
-    vscode.ConfigurationTarget.Global
-  );
+/** Surgically removes only the Terracotta-owned keys from the user's settings. */
+async function clearInjectedRules(): Promise<void> {
+  try {
+    const editorConfig = vscode.workspace.getConfiguration('editor');
+
+    const tokenInspect = editorConfig.inspect<Record<string, unknown>>('tokenColorCustomizations');
+    const tokenColors  = { ...(tokenInspect?.globalValue ?? {}) };
+    if (`[${THEME_LABEL}]` in tokenColors) {
+      delete tokenColors[`[${THEME_LABEL}]`];
+      await editorConfig.update(
+        'tokenColorCustomizations',
+        Object.keys(tokenColors).length > 0 ? tokenColors : undefined,
+        vscode.ConfigurationTarget.Global
+      );
+    }
+
+    const semanticInspect = editorConfig.inspect<Record<string, unknown>>('semanticTokenColorCustomizations');
+    const semanticColors  = { ...(semanticInspect?.globalValue ?? {}) };
+    if (`[${THEME_LABEL}]` in semanticColors) {
+      delete semanticColors[`[${THEME_LABEL}]`];
+      await editorConfig.update(
+        'semanticTokenColorCustomizations',
+        Object.keys(semanticColors).length > 0 ? semanticColors : undefined,
+        vscode.ConfigurationTarget.Global
+      );
+    }
+  } catch (err) {
+    // Best-effort cleanup — settings may be unavailable during shutdown
+    console.error('[Terracotta] Failed to clear injected rules:', err);
+  }
 }

@@ -204,7 +204,6 @@ export function buildLanguageRules(
   langId: string,
   c: TokenColors,
   italicComments: boolean,
-  italicKeywords: boolean,
   boldHeadings: boolean
 ): TokenColorRule[] {
   switch (langId) {
@@ -215,7 +214,7 @@ export function buildLanguageRules(
     case 'typescriptreact':
       return tsRules(c);
     case 'vue':
-      return vueRules(c, italicComments, italicKeywords, boldHeadings);
+      return vueRules(c, italicComments);
     case 'python':
       return pythonRules(c, italicComments);
     case 'rust':
@@ -284,9 +283,8 @@ function tsRules(c: TokenColors): TokenColorRule[] {
 }
 
 // ── Vue ───────────────────────────────────────────────────────────────────────
-function vueRules(c: TokenColors, italicComments: boolean, italicKeywords: boolean, boldHeadings: boolean): TokenColorRule[] {
+function vueRules(c: TokenColors, italicComments: boolean): TokenColorRule[] {
   const commentStyle = italicComments ? 'italic' : '';
-  void italicKeywords; // currently unused in vue-specific rules, applied via global rules
   return [
     // Vue directives
     rule('Vue: directive', [
@@ -571,31 +569,52 @@ function latexRules(c: TokenColors, italicComments: boolean): TokenColorRule[] {
 
 // ─── Semantic token colors ────────────────────────────────────────────────────
 
-export function buildSemanticRules(c: TokenColors): SemanticTokenColors {
+function semanticEntry(c: TokenColors, italicComments: boolean): SemanticTokenColors {
   return {
-    'keyword':                    c.keywords,
-    'number':                     c.numbers,
-    'regexp':                     c.regex,
-    'operator':                   c.operators,
-    'string':                     c.strings,
-    'comment':                    { foreground: c.comments, fontStyle: 'italic' },
-    'type':                       c.types,
-    'class':                      c.types,
-    'interface':                  c.types,
-    'enum':                       c.types,
-    'struct':                     c.types,
-    'typeParameter':              c.parameters,
-    'parameter':                  c.parameters,
-    'variable':                   c.variables,
-    'variable.defaultLibrary':    c.constants,
-    'property':                   c.properties,
-    'function':                   c.functions,
-    'function.defaultLibrary':    c.functions,
-    'method':                     c.functions,
-    'decorator':                  c.decorators,
-    'macro':                      c.decorators,
-    'namespace':                  c.types,
-    'enumMember':                 c.constants,
-    'selfKeyword':                c.parameters,
+    'keyword':                 c.keywords,
+    'number':                  c.numbers,
+    'regexp':                  c.regex,
+    'operator':                c.operators,
+    'string':                  c.strings,
+    'comment':                 italicComments
+                                 ? { foreground: c.comments, fontStyle: 'italic' }
+                                 : c.comments,
+    'type':                    c.types,
+    'class':                   c.types,
+    'interface':               c.types,
+    'enum':                    c.types,
+    'struct':                  c.types,
+    'typeParameter':           c.parameters,
+    'parameter':               c.parameters,
+    'variable':                c.variables,
+    'variable.defaultLibrary': c.constants,
+    'property':                c.properties,
+    'function':                c.functions,
+    'function.defaultLibrary': c.functions,
+    'method':                  c.functions,
+    'decorator':               c.decorators,
+    'macro':                   c.decorators,
+    'namespace':               c.types,
+    'enumMember':              c.constants,
+    'selfKeyword':             c.parameters,
   };
+}
+
+export function buildSemanticRules(
+  globalColors: TokenColors,
+  italicComments: boolean,
+  langOverrides: Record<string, TokenColors> = {}
+): SemanticTokenColors {
+  const rules: SemanticTokenColors = semanticEntry(globalColors, italicComments);
+
+  // Per-language semantic overrides using "tokenType:languageId" scoping syntax.
+  // This mirrors the per-language TextMate rules so both highlighting systems stay in sync.
+  for (const [langId, lc] of Object.entries(langOverrides)) {
+    const lang = semanticEntry(lc, italicComments);
+    for (const [token, value] of Object.entries(lang)) {
+      rules[`${token}:${langId}`] = value;
+    }
+  }
+
+  return rules;
 }

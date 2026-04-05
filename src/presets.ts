@@ -54,7 +54,8 @@ export const claudePreset: TokenColors = {
 
 export function resolvePreset(name: PresetName, customColors: PartialTokenColors): TokenColors {
   if (name === 'claude') {
-    return claudePreset;
+    // customColors can override individual tokens even within the claude preset
+    return { ...claudePreset, ...customColors };
   }
   if (name === 'custom') {
     return { ...warmPreset, ...customColors };
