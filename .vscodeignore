@@ -1,0 +1,22 @@
+.DS_Store
+.git
+.gitignore
+.vscode/
+*.vsix
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+.claude/
+src/
+dist/
+tsconfig.json
+themes/**
+!themes/terracotta-light-color-theme.json
+*.md
+!README.md
+!walkthroughs/*.md
+out/**/*.map
+*.js.map
+多语言代码片段示例 - Claude.html
+多语言代码片段示例 - Claude_files/

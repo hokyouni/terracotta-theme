@@ -1,0 +1,168 @@
+{
+  "name": "terracotta-theme",
+  "displayName": "%ext.displayName%",
+  "description": "%ext.description%",
+  "version": "0.2.0",
+  "publisher": "local",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "scripts": {
+    "compile": "tsc -p ./tsconfig.json",
+    "watch": "tsc -watch -p ./tsconfig.json",
+    "vscode:prepublish": "npm run compile",
+    "package": "npx @vscode/vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^22.0.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.7.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "terracotta",
+    "warm",
+    "light",
+    "claude",
+    "anthropic",
+    "clay",
+    "ivory",
+    "paper",
+    "color-theme",
+    "theme",
+    "syntax"
+  ],
+  "galleryBanner": {
+    "color": "#F0EEE6",
+    "theme": "light"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "label": "Terracotta Light",
+        "uiTheme": "vs",
+        "path": "./themes/terracotta-light-color-theme.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "terracotta.switchPreset",
+        "title": "%command.switchPreset.title%",
+        "category": "Terracotta"
+      }
+    ],
+    "walkthroughs": [
+      {
+        "id": "terracotta.gettingStarted",
+        "title": "%walkthrough.title%",
+        "description": "%walkthrough.description%",
+        "steps": [
+          {
+            "id": "terracotta.gettingStarted.preset",
+            "title": "%walkthrough.step1.title%",
+            "description": "%walkthrough.step1.description%",
+            "media": { "markdown": "walkthroughs/1-preset.md" }
+          },
+          {
+            "id": "terracotta.gettingStarted.languages",
+            "title": "%walkthrough.step2.title%",
+            "description": "%walkthrough.step2.description%",
+            "media": { "markdown": "walkthroughs/2-languages.md" }
+          },
+          {
+            "id": "terracotta.gettingStarted.custom",
+            "title": "%walkthrough.step3.title%",
+            "description": "%walkthrough.step3.description%",
+            "media": { "markdown": "walkthroughs/3-custom.md" }
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "%config.title%",
+      "properties": {
+        "terracotta.colorPreset": {
+          "type": "string",
+          "enum": ["warm", "claude", "custom"],
+          "enumDescriptions": [
+            "%config.colorPreset.warm%",
+            "%config.colorPreset.claude%",
+            "%config.colorPreset.custom%"
+          ],
+          "default": "warm",
+          "description": "%config.colorPreset.description%",
+          "order": 1
+        },
+        "terracotta.languages": {
+          "type": "object",
+          "description": "%config.languages.description%",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["warm", "claude", "custom", "follow-global"]
+          },
+          "default": {},
+          "order": 2
+        },
+        "terracotta.customColors": {
+          "type": "object",
+          "description": "%config.customColors.description%",
+          "default": {},
+          "order": 3,
+          "properties": {
+            "keywords":         { "type": "string", "description": "%config.customColors.keywords%" },
+            "controlFlow":      { "type": "string", "description": "%config.customColors.controlFlow%" },
+            "operators":        { "type": "string", "description": "%config.customColors.operators%" },
+            "types":            { "type": "string", "description": "%config.customColors.types%" },
+            "functions":        { "type": "string", "description": "%config.customColors.functions%" },
+            "parameters":       { "type": "string", "description": "%config.customColors.parameters%" },
+            "variables":        { "type": "string", "description": "%config.customColors.variables%" },
+            "properties":       { "type": "string", "description": "%config.customColors.properties%" },
+            "constants":        { "type": "string", "description": "%config.customColors.constants%" },
+            "strings":          { "type": "string", "description": "%config.customColors.strings%" },
+            "templateLiterals": { "type": "string", "description": "%config.customColors.templateLiterals%" },
+            "escapeSequences":  { "type": "string", "description": "%config.customColors.escapeSequences%" },
+            "numbers":          { "type": "string", "description": "%config.customColors.numbers%" },
+            "regex":            { "type": "string", "description": "%config.customColors.regex%" },
+            "tags":             { "type": "string", "description": "%config.customColors.tags%" },
+            "attributes":       { "type": "string", "description": "%config.customColors.attributes%" },
+            "decorators":       { "type": "string", "description": "%config.customColors.decorators%" },
+            "comments":         { "type": "string", "description": "%config.customColors.comments%" },
+            "punctuation":      { "type": "string", "description": "%config.customColors.punctuation%" }
+          }
+        },
+        "terracotta.italicComments": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.italicComments.description%",
+          "order": 4
+        },
+        "terracotta.italicKeywords": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.italicKeywords.description%",
+          "order": 5
+        },
+        "terracotta.boldHeadings": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.boldHeadings.description%",
+          "order": 6
+        },
+        "terracotta.enableDynamicColors": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.enableDynamicColors.description%",
+          "order": 7
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "ext.displayName": "Terracotta",
+  "ext.description": "受 Claude 设计语言启发的温暖纸质 VS Code 主题，带有动态配色方案系统和按语言独立控制的高亮颜色。",
+
+  "config.title": "Terracotta",
+
+  "config.colorPreset.description": "全局语法高亮配色方案。修改后立即生效，无需重新加载。",
+  "config.colorPreset.warm": "暖中性色调，以陶土橙 (#D97757) 作为主要强调色。",
+  "config.colorPreset.claude": "高仿 Claude.ai 网页版界面的语法高亮配色。",
+  "config.colorPreset.custom": "使用 terracotta.customColors 中定义的自定义颜色。",
+
+  "config.languages.description": "按语言设置独立的配色方案。键为 VS Code 语言 ID（如 javascript、typescript、python、rust、go、css、html），值为 'warm'、'claude'、'custom' 或 'follow-global'（跟随全局配色）。\n\n示例：{ \"python\": \"claude\", \"css\": \"custom\" }",
+
+  "config.customColors.description": "当配色方案为 'custom' 时使用的自定义 token 颜色。未设置的分类将回退到 'warm' 方案。值必须为十六进制颜色字符串（如 '#D97757'）。",
+  "config.customColors.keywords": "关键字和存储修饰符 —— const、function、import、class 等。",
+  "config.customColors.controlFlow": "控制流关键字 —— if、else、for、while、return 等。",
+  "config.customColors.operators": "运算符 —— +、-、===、=>、: 等。",
+  "config.customColors.types": "类型名、类、接口、结构体、枚举。",
+  "config.customColors.functions": "函数和方法名。",
+  "config.customColors.parameters": "函数 / 方法的参数名。",
+  "config.customColors.variables": "变量名。",
+  "config.customColors.properties": "对象属性和记录字段名。",
+  "config.customColors.constants": "常量、枚举成员、只读绑定。",
+  "config.customColors.strings": "字符串字面量。",
+  "config.customColors.templateLiterals": "模板字符串 / 插值字符串的标点符号（${ }）。",
+  "config.customColors.escapeSequences": "转义序列（\\n、\\t）和格式占位符（%s、{0}）。",
+  "config.customColors.numbers": "数字字面量。",
+  "config.customColors.regex": "正则表达式字面量。",
+  "config.customColors.tags": "HTML / JSX / CSS 标签名和选择器名。",
+  "config.customColors.attributes": "HTML / JSX 属性名。",
+  "config.customColors.decorators": "Python / TypeScript 装饰器，Rust 属性（#[derive]）。",
+  "config.customColors.comments": "单行和块注释。",
+  "config.customColors.punctuation": "括号、分隔符和结构性标点。",
+
+  "config.italicComments.description": "以斜体渲染注释。",
+  "config.italicKeywords.description": "以斜体渲染关键字和存储修饰符。搭配有独特斜体字形的字体效果最佳（如 Operator Mono、Fira Code iScript）。",
+  "config.boldHeadings.description": "以粗体渲染 Markdown 和 LaTeX 标题。",
+  "config.enableDynamicColors.description": "禁用后，插件将停止自动更新 editor.tokenColorCustomizations。如果您想手动微调注入的颜色规则而不被自动覆盖，请设为 false。",
+
+  "command.switchPreset.title": "切换配色方案",
+
+  "walkthrough.title": "开始使用 Terracotta",
+  "walkthrough.description": "几步完成你的温暖编辑器配置。",
+  "walkthrough.step1.title": "选择配色方案",
+  "walkthrough.step1.description": "Terracotta 内置两套配色方案，并支持完全自定义。[打开设置](command:workbench.action.openSettings?%22terracotta.colorPreset%22) 或在命令面板运行 **Terracotta: 切换配色方案**。",
+  "walkthrough.step2.title": "按语言单独设置",
+  "walkthrough.step2.description": "为特定语言使用不同配色方案。[配置语言覆盖](command:workbench.action.openSettings?%22terracotta.languages%22)",
+  "walkthrough.step3.title": "用自定义颜色精细调整",
+  "walkthrough.step3.description": "在 'custom' 方案激活时设置各个 token 的颜色。[打开自定义颜色设置](command:workbench.action.openSettings?%22terracotta.customColors%22)"
+}

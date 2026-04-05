@@ -1,0 +1,50 @@
+{
+  "ext.displayName": "Terracotta",
+  "ext.description": "A warm, paper-like VS Code theme inspired by Claude's design language — with a dynamic preset system and per-language color control.",
+
+  "config.title": "Terracotta",
+
+  "config.colorPreset.description": "Global syntax highlighting color preset. Changes apply instantly without reloading.",
+  "config.colorPreset.warm": "Warm neutral tones, clay orange (#D97757) as the primary accent.",
+  "config.colorPreset.claude": "High-fidelity replica of Claude.ai's web interface syntax highlighting.",
+  "config.colorPreset.custom": "Use your own colors defined in terracotta.customColors.",
+
+  "config.languages.description": "Per-language preset overrides. Keys are VS Code language IDs (e.g. javascript, typescript, python, rust, go, css, html). Values are 'warm', 'claude', 'custom', or 'follow-global' to inherit the global preset.\n\nExample: { \"python\": \"claude\", \"css\": \"custom\" }",
+
+  "config.customColors.description": "Individual token color overrides used when preset is 'custom' (globally or per-language). Unset categories fall back to the 'warm' preset. Values must be hex color strings (e.g. '#D97757').",
+  "config.customColors.keywords": "Keywords and storage modifiers — const, function, import, class, etc.",
+  "config.customColors.controlFlow": "Control flow keywords — if, else, for, while, return, etc.",
+  "config.customColors.operators": "Operators — +, -, ===, =>, :, etc.",
+  "config.customColors.types": "Type names, classes, interfaces, structs, enums.",
+  "config.customColors.functions": "Function and method names.",
+  "config.customColors.parameters": "Function / method parameters.",
+  "config.customColors.variables": "Variable names.",
+  "config.customColors.properties": "Object properties and record field names.",
+  "config.customColors.constants": "Constants, enum members, readonly bindings.",
+  "config.customColors.strings": "String literals.",
+  "config.customColors.templateLiterals": "Template literal / interpolated string punctuation (${ }).",
+  "config.customColors.escapeSequences": "Escape sequences (\\n, \\t) and format placeholders (%s, {0}).",
+  "config.customColors.numbers": "Numeric literals.",
+  "config.customColors.regex": "Regular expression literals.",
+  "config.customColors.tags": "HTML / JSX / CSS tag and selector names.",
+  "config.customColors.attributes": "HTML / JSX attribute names.",
+  "config.customColors.decorators": "Python / TypeScript decorators, Rust attributes (#[derive]).",
+  "config.customColors.comments": "Inline and block comments.",
+  "config.customColors.punctuation": "Brackets, delimiters, and structural punctuation.",
+
+  "config.italicComments.description": "Render comments in italic style.",
+  "config.italicKeywords.description": "Render keywords and storage modifiers in italic style. Best paired with a font that has distinct italic characters (e.g. Operator Mono, Fira Code iScript).",
+  "config.boldHeadings.description": "Render Markdown and LaTeX headings in bold.",
+  "config.enableDynamicColors.description": "When disabled, the extension stops auto-updating editor.tokenColorCustomizations. Useful if you want to manually fine-tune the injected rules without them being overwritten.",
+
+  "command.switchPreset.title": "Switch Color Preset",
+
+  "walkthrough.title": "Get started with Terracotta",
+  "walkthrough.description": "Set up your perfect warm editor in a few steps.",
+  "walkthrough.step1.title": "Choose your color preset",
+  "walkthrough.step1.description": "Terracotta comes with two built-in palettes and a fully custom option. [Open settings](command:workbench.action.openSettings?%22terracotta.colorPreset%22) or run **Terracotta: Switch Color Preset** from the Command Palette.",
+  "walkthrough.step2.title": "Override per language",
+  "walkthrough.step2.description": "Use a different palette just for specific languages. [Configure languages](command:workbench.action.openSettings?%22terracotta.languages%22)",
+  "walkthrough.step3.title": "Fine-tune with custom colors",
+  "walkthrough.step3.description": "Set individual token colors when the 'custom' preset is active. [Open custom colors](command:workbench.action.openSettings?%22terracotta.customColors%22)"
+}
