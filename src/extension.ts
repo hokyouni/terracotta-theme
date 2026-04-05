@@ -22,23 +22,11 @@ const messages = {
   presetClaudeDesc: t('Claude.ai web interface replica',  'Claude.ai 网页版配色复刻'),
   presetCustomDesc: t('Use your custom colors',           '使用自定义配色'),
   quickPickTitle:   t('Select color preset',              '选择配色方案'),
-  statusBarTooltip: t('Terracotta: click to switch preset', 'Terracotta：点击切换配色方案'),
-  notThemeActive:   t('Terracotta Light is not the active theme.', 'Terracotta Light 不是当前主题。'),
 };
-
-// ─── State ────────────────────────────────────────────────────────────────────
-
-let statusBarItem: vscode.StatusBarItem;
 
 // ─── Activation ───────────────────────────────────────────────────────────────
 
 export function activate(context: vscode.ExtensionContext): void {
-  // Status bar item
-  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.command = 'terracotta.switchPreset';
-  statusBarItem.tooltip = messages.statusBarTooltip;
-  context.subscriptions.push(statusBarItem);
-
   // Command: switch preset
   context.subscriptions.push(
     vscode.commands.registerCommand('terracotta.switchPreset', switchPresetCommand)
@@ -46,14 +34,12 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Initial apply
   applyTokenColors();
-  updateStatusBar();
 
   // React to settings changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(event => {
-      if (event.affectsConfiguration(CONFIG_ROOT) || event.affectsConfiguration('workbench.colorTheme')) {
+      if (event.affectsConfiguration(CONFIG_ROOT)) {
         applyTokenColors();
-        updateStatusBar();
       }
     })
   );
@@ -62,25 +48,6 @@ export function activate(context: vscode.ExtensionContext): void {
 export function deactivate(): void {
   // Leave injected rules in place so the theme still renders correctly
   // if the extension is temporarily disabled.
-}
-
-// ─── Status bar ───────────────────────────────────────────────────────────────
-
-function updateStatusBar(): void {
-  if (!isOurThemeActive()) {
-    statusBarItem.hide();
-    return;
-  }
-  const preset = vscode.workspace.getConfiguration(CONFIG_ROOT).get<PresetName>('colorPreset', 'warm');
-  const label = preset === 'claude' ? messages.presetClaude
-              : preset === 'custom' ? messages.presetCustom
-              : messages.presetWarm;
-  statusBarItem.text = `$(paintcan) ${label}`;
-  statusBarItem.show();
-}
-
-function isOurThemeActive(): boolean {
-  return vscode.workspace.getConfiguration('workbench').get<string>('colorTheme') === THEME_LABEL;
 }
 
 // ─── Command: switch preset ────────────────────────────────────────────────────

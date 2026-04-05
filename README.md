@@ -29,7 +29,6 @@ Terracotta 是一个浅色主题扩展，灵感来自温暖的纸张质感界面
 - Warm, paper-like UI designed for long reading and writing sessions.
 
 - 提供三种预设：`warm`、`claude`、`custom`，适配不同的语法高亮风格。
-- 在启用 Terracotta 主题时，状态栏会显示当前预设。
 - 支持 `Terracotta: Switch Color Preset` 命令，可在命令面板中快速切换配色预设。
 - 整体界面强调温暖、纸感和长时间阅读时的舒适度。
 
