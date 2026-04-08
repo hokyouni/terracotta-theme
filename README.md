@@ -24,7 +24,6 @@ Terracotta 是一个浅色主题扩展，灵感来自温暖的纸张质感界面
 ## Features | 特性
 
 - Three presets: `warm`, `claude`, and `custom` for different highlighting styles.
-- Status bar indicator shows the active Terracotta preset when the theme is enabled.
 - `Terracotta: Switch Color Preset` command for fast preset switching from the Command Palette.
 - Warm, paper-like UI designed for long reading and writing sessions.
 
