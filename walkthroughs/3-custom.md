@@ -1,6 +1,6 @@
 # Custom Colors / 自定义颜色
 
-When `terracotta.colorPreset` (or a per-language override) is set to `"custom"`, the extension uses `terracotta.customColors` for that language. Any token category you leave unset falls back to the **warm** preset.
+When `terracotta.colorPreset` (or a per-language override) is set to `"custom"`, the extension uses `terracotta.customColors` for that language. Any token category you leave unset falls back to the base preset configured in `terracotta.customBasePreset` (**warm** by default).
 
 ## Token categories / Token 分类
 
