@@ -8,5 +8,5 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Terracotta.
 - Warm, Claude-inspired, and custom syntax color presets.
-- Status bar preset indicator and `terracotta.switchPreset` command.
+- `terracotta.switchPreset` command for switching between color presets.
 - Per-language overrides and configurable token color customization.
