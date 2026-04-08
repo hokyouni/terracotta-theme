@@ -10,7 +10,7 @@ Terracotta ships with two hand-crafted palettes:
 
 ---
 
-**Switch with one click:** the `$(paintcan)` button in the status bar shows your current preset and opens this picker.
+**Switch via Settings:** open Settings (`Ctrl/Cmd+,`), search for `terracotta.colorPreset`, and choose from the dropdown.
 
 **Switch via Command Palette:** `Ctrl/Cmd+Shift+P` → **Terracotta: Switch Color Preset**
 
