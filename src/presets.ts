@@ -1,4 +1,19 @@
-import { TokenColors, PartialTokenColors, PresetName } from './types';
+import { TokenColors, PartialTokenColors, PresetName, TokenColorKey } from './types';
+
+const COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
+
+function validateCustomColors(colors: PartialTokenColors): PartialTokenColors {
+  const clean: PartialTokenColors = {};
+  for (const [k, v] of Object.entries(colors)) {
+    if (v === undefined) continue;
+    if (typeof v !== 'string' || !COLOR_RE.test(v)) {
+      console.warn(`[Terracotta] Ignoring invalid color for "${k}": ${JSON.stringify(v)}. Expected hex string like "#D97757".`);
+      continue;
+    }
+    (clean as Record<string, string>)[k] = v;
+  }
+  return clean;
+}
 
 // Warm neutral palette — primary accent: clay #D97757
 // Designed to complement the UI's ivory/charcoal aesthetic
@@ -52,13 +67,22 @@ export const claudePreset: TokenColors = {
   punctuation:      '#73726C',  // default text-tertiary
 };
 
-export function resolvePreset(name: PresetName, customColors: PartialTokenColors): TokenColors {
-  if (name === 'claude') {
-    // customColors can override individual tokens even within the claude preset
-    return { ...claudePreset, ...customColors };
-  }
+export function resolvePreset(
+  name: PresetName,
+  customColors: PartialTokenColors,
+  customBase?: 'warm' | 'claude'
+): TokenColors {
+  const validated = validateCustomColors(customColors);
+  const base = name === 'claude' ? claudePreset
+             : name === 'custom' ? (customBase === 'claude' ? claudePreset : warmPreset)
+             : warmPreset;
+  const resolved = { ...base };
   if (name === 'custom') {
-    return { ...warmPreset, ...customColors };
+    for (const [k, v] of Object.entries(validated)) {
+      if (v !== undefined) {
+        (resolved as Record<string, string>)[k] = v;
+      }
+    }
   }
-  return warmPreset;
+  return resolved;
 }
