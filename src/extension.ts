@@ -7,6 +7,14 @@ const THEME_LABEL = 'Terracotta Light';
 const CONFIG_ROOT = 'terracotta';
 const VALID_PRESETS = new Set(['warm', 'claude', 'custom']);
 
+const KNOWN_LANGUAGE_IDS = new Set([
+  'javascript', 'javascriptreact', 'typescript', 'typescriptreact',
+  'vue', 'python', 'rust', 'go', 'c', 'cpp',
+  'html', 'css', 'scss', 'less', 'json', 'jsonc',
+  'shellscript', 'bash', 'sh', 'yaml', 'toml',
+  'markdown', 'latex', 'tex',
+]);
+
 // ─── Locale helpers ───────────────────────────────────────────────────────────
 
 // Evaluated once at module load — stable for the lifetime of the extension process.
@@ -65,7 +73,14 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 export function deactivate(): Promise<void> {
-  return clearInjectedRules();
+  const cleanup = clearInjectedRules();
+  return new Promise<void>(resolve => {
+    const timeout = setTimeout(() => {
+      console.warn('[Terracotta] Deactivation cleanup timed out after 3s');
+      resolve();
+    }, 3000);
+    cleanup.then(() => { clearTimeout(timeout); resolve(); });
+  });
 }
 
 // ─── Command: switch preset ────────────────────────────────────────────────────
@@ -96,21 +111,46 @@ async function switchPresetCommand(): Promise<void> {
 
 // ─── Settings injection ────────────────────────────────────────────────────────
 
+// Serialise concurrent apply/clear calls so overlapping config-change events
+// cannot race on the settings file and cause lost-update corruption.
+let _settingsMutex: Promise<void> = Promise.resolve();
+
+function withSettingsMutex(fn: () => Promise<void>): Promise<void> {
+  _settingsMutex = _settingsMutex.then(() => fn().catch(err => {
+    console.error('[Terracotta] Settings operation failed:', err);
+  }));
+  return _settingsMutex;
+}
+
+let _lastAppliedKey = '';
+
 async function applyTokenColors(): Promise<void> {
+  return withSettingsMutex(_applyTokenColors);
+}
+
+async function _applyTokenColors(): Promise<void> {
+  if (!isOurThemeActive()) return;
+
   const config = vscode.workspace.getConfiguration(CONFIG_ROOT);
 
   if (!config.get<boolean>('enableDynamicColors', true)) {
+    await clearInjectedRules();
     return;
   }
 
   const globalPreset   = safePreset(config.get<string>('colorPreset', 'warm'));
   const langOverrides  = config.get<Record<string, string>>('languages', {});
   const customColors   = config.get<PartialTokenColors>('customColors', {});
+  const customBase     = config.get<'warm' | 'claude'>('customBasePreset', 'warm');
   const italicComments = config.get<boolean>('italicComments', true);
   const italicKeywords = config.get<boolean>('italicKeywords', false);
   const boldHeadings   = config.get<boolean>('boldHeadings', true);
 
-  const globalColors = resolvePreset(globalPreset, customColors);
+  const settingsKey = JSON.stringify({ globalPreset, langOverrides, customColors, customBase, italicComments, italicKeywords, boldHeadings });
+  if (settingsKey === _lastAppliedKey) return;
+  _lastAppliedKey = settingsKey;
+
+  const globalColors = resolvePreset(globalPreset, customColors, customBase);
   const globalRules  = buildGlobalRules(globalColors, italicComments, italicKeywords, boldHeadings);
 
   const langRules: TokenColorRule[] = [];
@@ -118,31 +158,56 @@ async function applyTokenColors(): Promise<void> {
 
   for (const [langId, rawPreset] of Object.entries(langOverrides)) {
     if (rawPreset === 'follow-global') continue;
-    const resolved = resolvePreset(safePreset(rawPreset), customColors);
+    if (typeof rawPreset !== 'string') {
+      console.warn(`[Terracotta] Ignoring non-string preset for language "${langId}": ${JSON.stringify(rawPreset)}`);
+      continue;
+    }
+    if (!KNOWN_LANGUAGE_IDS.has(langId)) {
+      console.warn(`[Terracotta] Unknown language ID "${langId}" — no language-specific rules will be applied`);
+    }
+    const resolved = resolvePreset(safePreset(rawPreset), customColors, customBase);
     langRules.push(...buildLanguageRules(langId, resolved, italicComments, boldHeadings));
     langSemanticColors[langId] = resolved;
   }
 
   try {
-    // Sequential awaits: avoid concurrent writes racing on the same settings file
-    await vscode.workspace.getConfiguration('editor').update(
-      'tokenColorCustomizations',
-      { [`[${THEME_LABEL}]`]: { textMateRules: [...globalRules, ...langRules] } },
-      vscode.ConfigurationTarget.Global
-    );
+    // Read before write so we only touch [Terracotta Light] without discarding
+    // unrelated theme blocks the user may have set elsewhere.
+    // NOTE: The extension fully owns the [Terracotta Light] block — textMateRules
+    // and semantic rules are replaced on every apply. User customisations should
+    // go through terracotta.customColors, not manual edits to this block.
+    const editorConfig = vscode.workspace.getConfiguration('editor');
 
-    await vscode.workspace.getConfiguration('editor').update(
-      'semanticTokenColorCustomizations',
-      { [`[${THEME_LABEL}]`]: buildSemanticRules(globalColors, italicComments, langSemanticColors) },
-      vscode.ConfigurationTarget.Global
-    );
+    const tokenInspect = editorConfig.inspect<Record<string, unknown>>('tokenColorCustomizations');
+    const tokenColors  = { ...(tokenInspect?.globalValue ?? {}) };
+    const existingTokenBlock = (tokenColors[`[${THEME_LABEL}]`] ?? {}) as Record<string, unknown>;
+    tokenColors[`[${THEME_LABEL}]`] = { ...existingTokenBlock, textMateRules: [...globalRules, ...langRules] };
+    await editorConfig.update('tokenColorCustomizations', tokenColors, vscode.ConfigurationTarget.Global);
+
+    const semanticInspect = editorConfig.inspect<Record<string, unknown>>('semanticTokenColorCustomizations');
+    const semanticColors  = { ...(semanticInspect?.globalValue ?? {}) };
+    const existingSemanticBlock = (semanticColors[`[${THEME_LABEL}]`] ?? {}) as Record<string, unknown>;
+    semanticColors[`[${THEME_LABEL}]`] = {
+      ...existingSemanticBlock,
+      ...buildSemanticRules(globalColors, italicComments, langSemanticColors)
+    };
+    await editorConfig.update('semanticTokenColorCustomizations', semanticColors, vscode.ConfigurationTarget.Global);
   } catch (err) {
     console.error('[Terracotta] Failed to apply token colors:', err);
   }
 }
 
-/** Surgically removes only the Terracotta-owned keys from the user's settings. */
+/** Surgically removes the [Terracotta Light] blocks from the user's settings.
+ *  Always runs regardless of enableDynamicColors — disabling the setting means
+ *  the extension stops managing colors entirely (including clearing past state).
+ *  Semantic token overrides are always removed because they cannot be easily
+ *  hand-edited around; TextMate rules are removed for consistency. */
 async function clearInjectedRules(): Promise<void> {
+  return withSettingsMutex(_clearInjectedRules);
+}
+
+async function _clearInjectedRules(): Promise<void> {
+  _lastAppliedKey = '';
   try {
     const editorConfig = vscode.workspace.getConfiguration('editor');
 
