@@ -127,20 +127,6 @@ Terracotta 是一个浅色主题扩展，灵感来自温暖的纸张质感界面
 }
 ```
 
-## Screenshots | 截图
-
-Place your marketplace screenshots here before publishing:
-
-- Placeholder: `screenshots/editor.png`
-- Placeholder: `screenshots/markdown.png`
-- Placeholder: `screenshots/settings.png`
-
-发布前可在这里替换为市场截图：
-
-- 占位文件：`screenshots/editor.png`
-- 占位文件：`screenshots/markdown.png`
-- 占位文件：`screenshots/settings.png`
-
 ## Commands | 命令
 
 - `Terracotta: Switch Color Preset` switches between `warm`, `claude`, and `custom`.

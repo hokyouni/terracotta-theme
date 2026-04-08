@@ -7,6 +7,7 @@ const THEME_LABEL = 'Terracotta Light';
 const CONFIG_ROOT = 'terracotta';
 const VALID_PRESETS = new Set(['warm', 'claude', 'custom']);
 
+// Keep in sync with the switch statement in buildLanguageRules() in scopes.ts
 const KNOWN_LANGUAGE_IDS = new Set([
   'javascript', 'javascriptreact', 'typescript', 'typescriptreact',
   'vue', 'python', 'rust', 'go', 'c', 'cpp',
