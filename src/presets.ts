@@ -10,7 +10,7 @@ function validateCustomColors(colors: PartialTokenColors): PartialTokenColors {
       console.warn(`[Terracotta] Ignoring invalid color for "${k}": ${JSON.stringify(v)}. Expected hex string like "#D97757".`);
       continue;
     }
-    (clean as Record<string, string>)[k] = v;
+    clean[k as TokenColorKey] = v;
   }
   return clean;
 }
@@ -80,7 +80,7 @@ export function resolvePreset(
   if (name === 'custom') {
     for (const [k, v] of Object.entries(validated)) {
       if (v !== undefined) {
-        (resolved as Record<string, string>)[k] = v;
+        resolved[k as TokenColorKey] = v;
       }
     }
   }

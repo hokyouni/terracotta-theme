@@ -138,29 +138,36 @@
             "punctuation":      { "type": "string", "description": "%config.customColors.punctuation%" }
           }
         },
+        "terracotta.customBasePreset": {
+          "type": "string",
+          "enum": ["warm", "claude"],
+          "default": "warm",
+          "description": "%config.customBasePreset.description%",
+          "order": 4
+        },
         "terracotta.italicComments": {
           "type": "boolean",
           "default": true,
           "description": "%config.italicComments.description%",
-          "order": 4
+          "order": 5
         },
         "terracotta.italicKeywords": {
           "type": "boolean",
           "default": false,
           "description": "%config.italicKeywords.description%",
-          "order": 5
+          "order": 6
         },
         "terracotta.boldHeadings": {
           "type": "boolean",
           "default": true,
           "description": "%config.boldHeadings.description%",
-          "order": 6
+          "order": 7
         },
         "terracotta.enableDynamicColors": {
           "type": "boolean",
           "default": true,
           "description": "%config.enableDynamicColors.description%",
-          "order": 7
+          "order": 8
         }
       }
     }

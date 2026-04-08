@@ -11,7 +11,9 @@
 
   "config.languages.description": "Per-language preset overrides. Keys are VS Code language IDs (e.g. javascript, typescript, python, rust, go, css, html). Values are 'warm', 'claude', 'custom', or 'follow-global' to inherit the global preset.\n\nExample: { \"python\": \"claude\", \"css\": \"custom\" }",
 
-  "config.customColors.description": "Individual token color overrides used when preset is 'custom' (globally or per-language). Unset categories fall back to the 'warm' preset. Values must be hex color strings (e.g. '#D97757').",
+  "config.customColors.description": "Individual token color overrides used when preset is 'custom' (globally or per-language). Unset categories fall back to the base preset (see terracotta.customBasePreset). Values must be hex color strings (e.g. '#D97757').",
+
+  "config.customBasePreset.description": "Base preset to inherit from when using 'custom' preset. 'warm' uses the Terracotta warm palette; 'claude' uses the Claude.ai palette. Individual color overrides from terracotta.customColors are layered on top.",
   "config.customColors.keywords": "Keywords and storage modifiers — const, function, import, class, etc.",
   "config.customColors.controlFlow": "Control flow keywords — if, else, for, while, return, etc.",
   "config.customColors.operators": "Operators — +, -, ===, =>, :, etc.",

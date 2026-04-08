@@ -24,6 +24,7 @@ export interface TokenColors {
 }
 
 export type PartialTokenColors = Partial<TokenColors>;
+export type TokenColorKey = keyof TokenColors;
 
 export interface TokenColorRule {
   name?: string;

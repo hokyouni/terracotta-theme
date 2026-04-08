@@ -11,7 +11,9 @@
 
   "config.languages.description": "按语言设置独立的配色方案。键为 VS Code 语言 ID（如 javascript、typescript、python、rust、go、css、html），值为 'warm'、'claude'、'custom' 或 'follow-global'（跟随全局配色）。\n\n示例：{ \"python\": \"claude\", \"css\": \"custom\" }",
 
-  "config.customColors.description": "当配色方案为 'custom' 时使用的自定义 token 颜色。未设置的分类将回退到 'warm' 方案。值必须为十六进制颜色字符串（如 '#D97757'）。",
+  "config.customColors.description": "当配色方案为 'custom' 时使用的自定义 token 颜色。未设置的分类将回退到基础配色方案（见 terracotta.customBasePreset）。值必须为十六进制颜色字符串（如 '#D97757'）。",
+
+  "config.customBasePreset.description": "使用 'custom' 方案时继承的基础配色。'warm' 使用 Terracotta 暖色调方案；'claude' 使用 Claude.ai 配色方案。自定义颜色覆盖会叠加在基础方案之上。",
   "config.customColors.keywords": "关键字和存储修饰符 —— const、function、import、class 等。",
   "config.customColors.controlFlow": "控制流关键字 —— if、else、for、while、return 等。",
   "config.customColors.operators": "运算符 —— +、-、===、=>、: 等。",
