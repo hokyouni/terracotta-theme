@@ -1,7 +1,34 @@
-.git-alt/
+# Dependencies
 node_modules/
+
+# Build output
 out/
 dist/
+
+# VS Code test
 .vscode-test/
+
+# Generated files
 *.vsix
 *.js.map
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+.git-alt/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp

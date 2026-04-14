@@ -1,22 +1,38 @@
-.DS_Store
+# Build and dev files
 .git
 .gitignore
 .vscode/
-*.vsix
 node_modules/
-npm-debug.log*
-yarn.lock
-pnpm-lock.yaml
-.claude/
 src/
 dist/
 tsconfig.json
-themes/**
-!themes/terracotta-light-color-theme.json
+
+# Generated files
+*.vsix
+out/**/*.map
+*.js.map
+
+# Logs and locks
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+pnpm-lock.yaml
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude Code (keep local)
+.claude/
+
+# Docs (only keep README and walkthroughs)
 *.md
 !README.md
 !walkthroughs/*.md
-out/**/*.map
-*.js.map
-多语言代码片段示例 - Claude.html
-多语言代码片段示例 - Claude_files/
+!LICENSE
+
+# Themes (only keep the main theme)
+themes/**
+!themes/terracotta-light-color-theme.json
